@@ -109,7 +109,11 @@ jobs:
           role-to-assume: ${{ secrets.AWS_CI_ROLE_ARN }}
       - name: Install Go dependencies
         run: make ensure
-      - name: Run ${{ matrix.clouds }}${{ matrix.languages }} Tests
+      - if: matrix.languages == "go"
+        name: Run ${{ matrix.clouds }}${{ matrix.languages }} Tests
+        run: make specific_test_set TestSet=${{ matrix.clouds }}${{ matrix.languages }} TestParallelism=2
+      - if: matrix.languages != "go"
+        name: Run ${{ matrix.clouds }}${{ matrix.languages }} Tests
         run: make specific_test_set TestSet=${{ matrix.clouds }}${{ matrix.languages }}
       - if: failure() && github.event_name == 'push'
         name: Notify Slack
